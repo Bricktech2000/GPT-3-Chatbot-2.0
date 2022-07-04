@@ -1,0 +1,34 @@
+account:
+https://beta.openai.com/account/billing/overview
+click: setup paid account
+
+https://beta.openai.com/account/billing/limits
+hard limit: 10$
+soft limit: 5$
+
+
+src: https://beta.openai.com/docs/guides/fine-tuning
+
+pip install --upgrade openai
+export OPENAI_API_KEY=<OPENAI_API_KEY>
+
+make sure no warnings are output:
+openai tools fine_tunes.prepare_data -f compiled-openai-training-data.jsonl
+
+
+model used: Curie
+reason: 10 times cheaper than Davinci but still fairly good
+https://beta.openai.com/docs/models/overview
+https://openai.com/api/pricing/
+
+epochs used: 2
+reason: this bot is somewhat of a chatbot, which seems to fall under "conditional generation" bots
+https://beta.openai.com/docs/guides/fine-tuning/conditional-generation
+
+openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
+
+command result:
+Fine-tune cost: 0.76$
+duration: TODO:
+
+https://beta.openai.com/docs/guides/fine-tuning/continue-fine-tuning-from-a-fine-tuned-model
