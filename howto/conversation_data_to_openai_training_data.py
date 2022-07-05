@@ -7,7 +7,7 @@ with open('transcribed-conversation-data.md', 'r') as f:
   data_conversations = f.read()
 
 data_lines = list(
-    filter(lambda line: not line.startswith('#'),
+    filter(lambda line: not line.startswith('#') and not 'TODO:' in line,
            data_conversations.split('# START')[1].split('\n\n'))
 )
 

@@ -13,6 +13,7 @@ pip install --upgrade openai
 export OPENAI_API_KEY=<OPENAI_API_KEY>
 
 make sure no warnings are output:
+
 openai tools fine_tunes.prepare_data -f compiled-openai-training-data.jsonl
 
 
@@ -28,7 +29,8 @@ https://beta.openai.com/docs/guides/fine-tuning/conditional-generation
 openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
 
 command result:
-Fine-tune cost: 0.76$
-duration: 10m
+Fine-tune cost: 0.71$
+Fine-tune enqueued. Queue number: 0
+command duration: 10m
 
 https://beta.openai.com/docs/guides/fine-tuning/continue-fine-tuning-from-a-fine-tuned-model

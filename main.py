@@ -87,20 +87,21 @@ def function_from_command(command=None):
       await asyncio.sleep(typing_delay)
     await message.channel.send(arg)
 
-  async def do_nothing(message, arg):
+  async def do_nothing(message, save, arg):
     pass
 
   COMMAND_MAP = {
-      'INIT': do_nothing,
-      'SAVE': do_log('save last message'),
-      'REACT': do_react,
-      'REPLY': do_reply,
-      'SLEEP': do_sleep,
-      'SLEPT': do_nothing,
-      'PHOTO': do_log('send photo:'),
-      'VIDEO': do_log('send video:'),
-      'MEME': do_log('send meme:'),
-      'SEND': do_send
+      'INIT;': do_nothing,
+      'SAVE;': do_log('save last message'),
+      'REACT: ': do_react,
+      'REPLY: ': do_reply,
+      'PHOTO: ': do_log('send photo:'),
+      'VIDEO: ': do_log('send video:'),
+      'PHOTO;': do_log('send random photo'),
+      'VIDEO;': do_log('send random video'),
+      'MEME: ': do_log('send meme:'),
+      'SCREEN: ': do_log('send screenshot:'),
+      '': do_send
   }
 
   return COMMAND_MAP[command] if command is not None else COMMAND_MAP
@@ -150,7 +151,7 @@ async def on_message(message):
         name_from_member(message.author), content, time.time())
   for attachment in message.attachments:
     conversation = conversation.with_message(
-        name_from_member(message.author), 'PHOTO', time.time())
+        name_from_member(message.author), 'PHOTO;', time.time())
   conversations[conversation_id] = conversation
 
   if message.guild.get_member(client.user.id).status != discord.Status.online:
@@ -160,25 +161,25 @@ async def on_message(message):
   prediction = GPT_3(
       conversation.get_conversation(NUM_MESSAGES) + '\n\n')
 
-  if content.startswith('OVERRIDE '):
-    prediction = f"{name_from_member(client.user)}: {content.replace('OVERRIDE ', '')}"
+  if content.startswith('OVERRIDE: '):
+    prediction = f"{name_from_member(client.user)}: {content.replace('OVERRIDE: ', '')}"
 
   print(conversation.get_conversation(NUM_MESSAGES) + '\n\n', end='')
   print(prediction, end='')
   print('\n\n')
 
   match = re.search(
-      f"^(.+?): (({'|'.join(function_from_command()) }) )?(.*)$", prediction)
+      f"^(.+?): ({'|'.join(function_from_command())})(.*?)$", prediction)
   if match:
     # prediction is correctly formed
     res_name, command, arg = match.group(1), \
-        match.group(3) or 'SEND', match.group(4)
+        match.group(2), match.group(3)
 
     if res_name == name_from_member(client.user):
       # GPT-3 predicts bot should take action
       def save():
         conversations[conversation_id] = conversations[conversation_id].with_message(
-            name_from_member(client.user), arg, time.time())
+            name_from_member(client.user), f'{command}{arg}', time.time())
       await function_from_command(command)(message, save, arg)
 
 
