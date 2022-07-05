@@ -21,8 +21,8 @@ reason: 10 times cheaper than Davinci but still fairly good
 https://beta.openai.com/docs/models/overview
 https://openai.com/api/pricing/
 
-epochs used: 2
-reason: this bot is somewhat of a chatbot, which seems to fall under "conditional generation" bots
+epochs used: 4
+reason: this bot is somewhat of a chatbot, which seems to fall under "conditional generation" bots. however, since training turned out to be cheaper than expected, it was increased from 2 to 4
 https://beta.openai.com/docs/guides/fine-tuning/conditional-generation
 
 openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
