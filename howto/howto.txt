@@ -29,6 +29,6 @@ openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie -
 
 command result:
 Fine-tune cost: 0.76$
-duration: TODO:
+duration: 10m
 
 https://beta.openai.com/docs/guides/fine-tuning/continue-fine-tuning-from-a-fine-tuned-model

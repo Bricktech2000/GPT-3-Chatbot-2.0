@@ -13,6 +13,7 @@ if len(sys.argv) != 4:
 # https://stackoverflow.com/questions/64221377/discord-py-rewrite-get-member-function-returning-none-for-all-users-except-bot
 intents = discord.Intents.default()
 intents.members = True
+intents.presences = True
 client = discord.Client(intents=intents)
 
 BOT_TOKEN = sys.argv[1]
@@ -46,10 +47,16 @@ def name_from_member(member):
 
 
 def function_from_command(command=None):
-  async def do_react(message, arg): await message.add_reaction(arg)
-  async def do_reply(message, arg): await message.reply(arg)
+  async def do_react(message, save, arg):
+    save()
+    await message.add_reaction(arg)
 
-  async def do_sleep(message, arg):
+  async def do_reply(message, save, arg):
+    save()
+    await message.reply(arg)
+
+  async def do_sleep(message, save, arg):
+    save()
     # https://stackoverflow.com/questions/49286640/how-to-set-bots-status
     # https://stackoverflow.com/questions/65773693/how-to-set-an-invisible-status-using-discord-py
     try:
@@ -66,14 +73,15 @@ def function_from_command(command=None):
     print('bot is sleeping')
     await asyncio.sleep(time)
     await client.change_presence(status=discord.Status.online)
-    print('bot has woken')
+    print('bot is awake')
 
   def do_log(text):
-    async def func(message, arg):
+    async def func(message, save, arg):
       await message.channel.send(f'**COMMAND: {text}** {arg}')
     return func
 
-  async def do_send(message, arg):
+  async def do_send(message, save, arg):
+    save()
     async with message.channel.typing():
       typing_delay = len(arg) / TYPING_SPEED
       await asyncio.sleep(typing_delay)
@@ -135,15 +143,19 @@ async def on_message(message):
 
   # TODO: media / pictures
 
-  # TODO: timeout?
+  # TODO: auto wake after inactivity and sleeping
 
-  if content != '':
+  if message.author.id != client.user.id and content != '':
     conversation = conversation.with_message(
         name_from_member(message.author), content, time.time())
   for attachment in message.attachments:
     conversation = conversation.with_message(
         name_from_member(message.author), 'PHOTO', time.time())
   conversations[conversation_id] = conversation
+
+  if message.guild.get_member(client.user.id).status != discord.Status.online:
+    # return if the bot is sleeping
+    return
 
   prediction = GPT_3(
       conversation.get_conversation(NUM_MESSAGES) + '\n\n')
@@ -164,7 +176,10 @@ async def on_message(message):
 
     if res_name == name_from_member(client.user):
       # GPT-3 predicts bot should take action
-      await function_from_command(command)(message, arg)
+      def save():
+        conversations[conversation_id] = conversations[conversation_id].with_message(
+            name_from_member(client.user), arg, time.time())
+      await function_from_command(command)(message, save, arg)
 
 
 openai.api_key = API_KEY
