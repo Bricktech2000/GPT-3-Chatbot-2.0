@@ -71,6 +71,8 @@ def function_from_command(command=None):
     print(f'bot is sleeping for {round(delay)}s\n\n')
     await client.change_presence(status=discord.Status.offline)
     await asyncio.sleep(delay)
+    if message.guild.get_member(client.user.id).status == discord.Status.online:
+      return
     await client.change_presence(status=discord.Status.online)
     print(f'bot is awake\n\n')
 
@@ -178,8 +180,8 @@ async def execute(message, conversation, save):
 
   # TODO: auto wake after inactivity and sleeping
 
-  if message.guild.get_member(client.user.id).status != discord.Status.online:
-    # return if the bot is sleeping
+  # return if the bot is sleeping, but with a certain probability to go back online
+  if message.guild.get_member(client.user.id).status != discord.Status.online and not math.random() < 0.125:
     return
 
   prediction = GPT_3(
@@ -200,6 +202,9 @@ async def execute(message, conversation, save):
         match.group(2), match.group(3)
 
     if res_name == name_from_member(client.user) or command == 'INIT;':
+      if message.guild.get_member(client.user.id).status != discord.Status.online:
+        await client.change_presence(status=discord.Status.online)
+
       # GPT-3 predicts bot should take action
       conversation, save = conversation_manager.get(
           message.channel.id, message.guild.id)
