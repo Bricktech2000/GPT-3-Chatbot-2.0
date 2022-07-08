@@ -6,7 +6,6 @@ import sys
 import re
 import time
 import random
-from conversation import Conversation
 from conversation import ConversationManager
 
 if len(sys.argv) != 4:
@@ -59,22 +58,22 @@ def function_from_command(command=None):
     save(conversation)
     await message.reply(arg)
 
-  async def do_sleep(message, conversation, save, arg):
+  async def do_sleep(message, conversation, save, arg, go_offline=True, min=30, max=1*60*60):
+    # 30 seconds to 1 hour
     # https://stackoverflow.com/questions/49286640/how-to-set-bots-status
     # https://stackoverflow.com/questions/65773693/how-to-set-an-invisible-status-using-discord-py
 
-    min, max = 30, 1 * 60 * 60  # 5 seconds to 3 hours
     # make it more likely to sleep for less time
     n = 10
     delay = math.pow(random.uniform(math.pow(min, 1/n), math.pow(max, 1/n)), n)
 
     print(f'bot is sleeping for {round(delay)}s\n\n')
-    await client.change_presence(status=discord.Status.offline)
+    if go_offline:
+      await client.change_presence(status=discord.Status.offline)
     await asyncio.sleep(delay)
-    if message.guild.get_member(client.user.id).status == discord.Status.online:
+    if go_offline and message.guild.get_member(client.user.id).status == discord.Status.online:
       return
     await client.change_presence(status=discord.Status.online)
-    print(f'bot is awake\n\n')
 
     conversation = conversation.without_last().with_message(
         name_from_member(client.user), '', time.time())
@@ -130,12 +129,33 @@ def GPT_3(messages):
   return str(response_object['choices'][0]['text'])[1:]
 
 
-@ client.event
+conversation_manager = ConversationManager(CONVERSATION_TIMEOUT)
+
+
+@client.event
 async def on_ready():
   print(f"Logged in as {client.user}")
 
+  # randomly initiate a conversation
+  while True:
+    await asyncio.sleep(1)
+    random_channel_id, random_guild_id = random.choice(
+        conversation_manager.get_all_ids() or [[None, None]])
 
-conversation_manager = ConversationManager(CONVERSATION_TIMEOUT)
+    # wait for conversation_manager to have a conversation available
+    if random_channel_id is None:
+      continue
+
+    conversation, save = conversation_manager.get(
+        random_channel_id, random_guild_id)
+    # add a temporary message because `do_sleep` will remove the last message
+    conversation = conversation.with_message(
+        ' ', ' ', time.time())
+    channel = client.get_channel(int(random_channel_id))
+    last_message = (await channel.history(limit=1).flatten())[0]
+
+    # 5 hours to 20 hours
+    await function_from_command('INIT;')(last_message, conversation, save, None, go_offline=False, min=5*60*60, max=20*60*60)
 
 
 @ client.event
@@ -178,8 +198,6 @@ async def on_message(message):
 async def execute(message, conversation, save):
   # TODO: media / pictures
 
-  # TODO: auto wake after inactivity and sleeping
-
   # return if the bot is sleeping, but with a certain probability to go back online
   if message.guild.get_member(client.user.id).status != discord.Status.online and not math.random() < 0.125:
     return
@@ -202,10 +220,10 @@ async def execute(message, conversation, save):
         match.group(2), match.group(3)
 
     if res_name == name_from_member(client.user) or command == 'INIT;':
+      # GPT-3 predicts bot should take action
       if message.guild.get_member(client.user.id).status != discord.Status.online:
         await client.change_presence(status=discord.Status.online)
 
-      # GPT-3 predicts bot should take action
       conversation, save = conversation_manager.get(
           message.channel.id, message.guild.id)
 

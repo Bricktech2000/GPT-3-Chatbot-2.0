@@ -35,3 +35,6 @@ class ConversationManager:
       self.conversations[conversation_id] = conversation
 
     return self.conversations[conversation_id], save
+
+  def get_all_ids(self):
+    return list(map(lambda key: key.split('\n'), self.conversations.keys()))
