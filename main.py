@@ -199,7 +199,7 @@ async def execute(message, conversation, save):
   # TODO: media / pictures
 
   # return if the bot is sleeping, but with a certain probability to go back online
-  if message.guild.get_member(client.user.id).status != discord.Status.online and not math.random() < 0.125:
+  if message.guild.get_member(client.user.id).status != discord.Status.online and not random.random() < 0.125:
     return
 
   prediction = GPT_3(
