@@ -7,6 +7,7 @@ hard limit: 10$
 soft limit: 5$
 
 
+
 src: https://beta.openai.com/docs/guides/fine-tuning
 
 pip install --upgrade openai
@@ -26,11 +27,13 @@ epochs used: 4
 reason: this bot is somewhat of a chatbot, which seems to fall under "conditional generation" bots. however, since training turned out to be cheaper than expected, it was increased from 2 to 4
 https://beta.openai.com/docs/guides/fine-tuning/conditional-generation
 
+python3 conversation_data_to_openai_training_data.py
 openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
 
 command result:
-Fine-tune cost: 0.71$
+Fine-tune cost: 1.04$
 Fine-tune enqueued. Queue number: 0
 command duration: 10m
 
 https://beta.openai.com/docs/guides/fine-tuning/continue-fine-tuning-from-a-fine-tuned-model
+

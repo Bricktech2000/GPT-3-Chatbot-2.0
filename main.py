@@ -9,7 +9,7 @@ import random
 from conversation import ConversationManager
 
 if len(sys.argv) != 4:
-  print("Usage: python main.py <Discord bot token> <OpenAI API key> <OpenAI model name")
+  print("Usage: python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
   exit(1)
 
 # https://stackoverflow.com/questions/64221377/discord-py-rewrite-get-member-function-returning-none-for-all-users-except-bot
@@ -98,7 +98,7 @@ def function_from_command(command=None):
 
   COMMAND_MAP = {
       'INIT;': do_sleep,
-      'SAVE;': do_log('save last message'),
+      'SAVE;': do_nothing,
       'REACT: ': do_react,
       'REPLY: ': do_reply,
       'PHOTO: ': do_log('send photo:'),
