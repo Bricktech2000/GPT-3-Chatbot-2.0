@@ -1,4 +1,5 @@
 __pycache__
+conversations.json
 howto/compiled-openai-training-data.jsonl
 howto/_transcribed-conversation-data.md
 howto/transcribed-conversation-data.md

@@ -9,7 +9,7 @@ import random
 from conversation import ConversationManager
 
 if len(sys.argv) != 4:
-  print("Usage: python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
+  print("Error: Usage: python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
   exit(1)
 
 # https://stackoverflow.com/questions/64221377/discord-py-rewrite-get-member-function-returning-none-for-all-users-except-bot
@@ -28,6 +28,7 @@ TEMPERATURE = 0.8  # the "originality" of GPT-3's answers
 MAX_TOKENS = 50  # the maximal length of GPt-3's answers
 TYPING_SPEED = 15  # characters per second
 CONVERSATION_TIMEOUT = 120  # seconds, time for a conversation to be considered dead
+SERIALIZE_PATH = 'conversations.json'  # the path to serialize conversations
 
 
 def name_from_member(member):
@@ -67,7 +68,7 @@ def function_from_command(command=None):
     n = 10
     delay = math.pow(random.uniform(math.pow(min, 1/n), math.pow(max, 1/n)), n)
 
-    print(f'bot is sleeping for {round(delay)}s\n\n')
+    print(f'Notice: Bot is sleeping for {round(delay)}s')
     if go_offline:
       await client.change_presence(status=discord.Status.offline)
     await asyncio.sleep(delay)
@@ -129,7 +130,8 @@ def GPT_3(messages):
   return str(response_object['choices'][0]['text'])[1:]
 
 
-conversation_manager = ConversationManager(CONVERSATION_TIMEOUT)
+conversation_manager = ConversationManager(
+    CONVERSATION_TIMEOUT, SERIALIZE_PATH)
 
 
 @client.event
@@ -208,9 +210,10 @@ async def execute(message, conversation, save):
   if message.content.startswith('OVERRIDE: '):
     prediction = f"{name_from_member(client.user)}: {message.content.replace('OVERRIDE: ', '')}"
 
-  print(conversation.get_last_messages(NUM_MESSAGES) + '\n\n', end='')
-  print(prediction, end='')
-  print('\n\n')
+  # print(conversation.get_last_messages(NUM_MESSAGES) + '\n\n', end='')
+  # print(prediction, end='')
+  # print('\n\n')
+  print(f'Prediction: {prediction}')
 
   match = re.search(
       f"^(.+?): ({'|'.join(function_from_command())})(.*?)$", prediction)
