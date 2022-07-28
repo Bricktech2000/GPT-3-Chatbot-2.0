@@ -1,6 +1,7 @@
 import math
 import discord
 import openai
+import json
 import asyncio
 import sys
 import re
@@ -32,22 +33,10 @@ SERIALIZE_PATH = 'conversations.json'  # the path to serialize conversations
 
 
 def name_from_member(member):
-  # TODO: move out of this file
-  NAME_MAP = {
-      296473451190026240: 'max',
-      362627068430909450: 'emilien',
-      349323309357465619: 'alex',
-      423516682548412418: 'reid',
-      381859631481487361: 'amelie',
-      334409678387806208: 'cameron',
-      426167359665995777: 'edouard',
-      529778786330345483: 'jaya',
-      858772258394996768: 'kiera',
-      573621663753568306: 'courtney',
-      0: 'grace'
-  }
-  id = member.id if member.id != client.user.id else 0
-  return NAME_MAP.get(id, member.display_name).lower()
+  with open('username_map.json', 'r') as f:
+    username_map = json.load(f)
+    id = member.id if member.id != client.user.id else 0
+    return username_map.get(id, member.display_name).lower()
 
 
 def function_from_command(command=None):

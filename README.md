@@ -10,7 +10,9 @@ We currently use this bot on our servers to replace our friend Grace, who decide
 
 ## Transcribing Conversation Data
 
-Create a markdown file called `transcribed-conversation-data.md` containing conversation data in the following format:
+Conversation data has been removed from the repository for privacy reasons. Therefore, you must create your own dataset to use this bot.
+
+Create a markdown file called `howto/transcribed-conversation-data.md` containing conversation data in the following format:
 
 ```markdown
 # START
@@ -86,22 +88,22 @@ Note that `username: PHOTO;` and `username: VIDEO;` can be used to represent sen
 
 ## Generating Custom OpenAI Model
 
-After acquiring an [OpenAI API key](https://openai.com/api-keys), run the following commands to generate a custom OpenAI model:
+After acquiring an [OpenAI API key](https://openai.com/api-keys), run the following commands to generate a custom OpenAI model in the `howto` folder:
 
 ```bash
 export OPENAI_API_KEY=<OPENAI_API_KEY>
 
-python3 conversation_data_to_openai_training_data.py
+python3 conversation_data_to_openai_training_data.py # format training data for OpenAI
 openai tools fine_tunes.prepare_data -f compiled-openai-training-data.jsonl # make sure no warnings are output
 
-openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
+openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4 # train the custom model
 ```
 
 Note that you will be billed around 1$ for 5000 words worth of training data.
 
-Take note of the model name that was generated, as you will need it for the next step.
+Take note of the model name that was generated, as you will need it for the next steps.
 
-## Running the bot
+## Running the Bot
 
 Start by installing all required dependencies:
 
@@ -109,8 +111,14 @@ Start by installing all required dependencies:
 pip install discord openai
 ```
 
-Then, run the bot using a [Discord bot token](https://discord.com/developers/applications/), an [OpenAI API key](https://openai.com/api/) and the OpenAI model name generated previously.
+Then, change the contents of the `username_map.json` file to map Discord user IDs to the names used in the training data. The user to be imitated must have its user ID set to `0`.
+
+Finally, run the bot using a [Discord bot token](https://discord.com/developers/applications/), an [OpenAI API key](https://openai.com/api/) and the OpenAI model name generated previously.
 
 ```bash
 python3 python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>
 ```
+
+## Credits
+
+This bot is inspired by a similar chatbot two friends and I worked on: <https://github.com/Bricktech2000/GPT-3-Conversational-Bot>
