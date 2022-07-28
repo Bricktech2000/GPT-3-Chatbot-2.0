@@ -13,10 +13,6 @@ src: https://beta.openai.com/docs/guides/fine-tuning
 pip install --upgrade openai
 export OPENAI_API_KEY=<OPENAI_API_KEY>
 
-make sure no warnings are output:
-
-openai tools fine_tunes.prepare_data -f compiled-openai-training-data.jsonl
-
 
 model used: Curie
 reason: 10 times cheaper than Davinci but still fairly good
@@ -28,6 +24,10 @@ reason: this bot is somewhat of a chatbot, which seems to fall under "conditiona
 https://beta.openai.com/docs/guides/fine-tuning/conditional-generation
 
 python3 conversation_data_to_openai_training_data.py
+
+make sure no warnings are output:
+openai tools fine_tunes.prepare_data -f compiled-openai-training-data.jsonl
+
 openai api fine_tunes.create -t "compiled-openai-training-data.jsonl" -m curie --n_epochs 4
 
 command result:

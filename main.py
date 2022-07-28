@@ -9,7 +9,7 @@ import random
 from conversation import ConversationManager
 
 if len(sys.argv) != 4:
-  print("Error: Usage: python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
+  print("Error: Usage: python3 main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
   exit(1)
 
 # https://stackoverflow.com/questions/64221377/discord-py-rewrite-get-member-function-returning-none-for-all-users-except-bot
