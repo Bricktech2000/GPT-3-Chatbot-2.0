@@ -103,12 +103,20 @@ Note that you will be billed around 1$ for 5000 words worth of training data.
 
 Take note of the model name that was generated, as you will need it for the next steps.
 
+## Getting Dall-E 2 Bearer Token
+
+1. Navigate to <https://labs.openai.com/>
+2. Open network tab in developer tools
+3. Type any prompt and press _Generate_
+4. Look for request to <https://labs.openai.com/api/labs/tasks>
+5. Get bearer token from `authorization` header
+
 ## Running the Bot
 
 Start by installing all required dependencies:
 
 ```bash
-pip install discord openai
+pip install discord openai dalle2
 ```
 
 Then, change the contents of the `username_map.json` file to map Discord user IDs to the names used in the training data. The user to be imitated must have its user ID set to `0`.
@@ -116,7 +124,7 @@ Then, change the contents of the `username_map.json` file to map Discord user ID
 Finally, run the bot using a [Discord bot token](https://discord.com/developers/applications/), an [OpenAI API key](https://openai.com/api/) and the OpenAI model name generated previously.
 
 ```bash
-python3 python main.py <Discord bot token> <OpenAI API key> <OpenAI model name>
+python3 python main.py <Discord bot token> <OpenAI API key> <OpenAI model name> <OpenAI Dall-E bearer token>
 ```
 
 ## Credits

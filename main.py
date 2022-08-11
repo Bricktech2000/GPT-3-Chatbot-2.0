@@ -7,10 +7,13 @@ import sys
 import re
 import time
 import random
+import io
+import aiohttp
+from dalle2 import Dalle2
 from conversation import ConversationManager
 
-if len(sys.argv) != 4:
-  print("Error: Usage: python3 main.py <Discord bot token> <OpenAI API key> <OpenAI model name>")
+if len(sys.argv) != 5:
+  print('Error: Usage: python3 main.py <Discord bot token> <OpenAI API key> <OpenAI model name> <OpenAI Dall-E bearer token>')
   exit(1)
 
 # https://stackoverflow.com/questions/64221377/discord-py-rewrite-get-member-function-returning-none-for-all-users-except-bot
@@ -21,8 +24,9 @@ intents.reactions = True
 client = discord.Client(intents=intents)
 
 BOT_TOKEN = sys.argv[1]
-API_KEY = sys.argv[2]
-ENGINE = sys.argv[3]
+OPENAI_API_KEY = sys.argv[2]
+OPENAI_ENGINE = sys.argv[3]
+OPENAI_DALLE_TOKEN = sys.argv[4]
 
 NUM_MESSAGES = 8  # the number of messages to append to the training data
 TEMPERATURE = 0.8  # the "originality" of GPT-3's answers
@@ -86,16 +90,31 @@ def function_from_command(command=None):
   async def do_nothing(message, conversation, save, arg):
     pass
 
+  def do_media(media_type):
+    async def func(message, conversation, save, arg):
+      save(conversation)
+
+      # https://stackoverflow.com/questions/68189435/how-to-make-discord-bot-send-images-from-an-online-link-python
+      async with aiohttp.ClientSession() as session:
+        async with session.get(DALLE_2(f'{media_type} {arg}')) as resp:
+          if resp.status != 200:
+            print(f'Error: DallE returned status code {resp.status}')
+            return
+          data = io.BytesIO(await resp.read())
+          await message.channel.send(file=discord.File(data, f'{arg}.png'))
+
+    return func
+
   COMMAND_MAP = {
       'INIT;': do_sleep,
       'SAVE;': do_nothing,
       'REACT: ': do_react,
       'REPLY: ': do_reply,
-      'PHOTO: ': do_log('send photo:'),
-      'VIDEO: ': do_log('send video:'),
+      'PHOTO: ': do_media('photo of '),
+      'VIDEO: ': do_media('video of '),
       'PHOTO;': do_log('send random photo'),
       'VIDEO;': do_log('send random video'),
-      'MEME: ': do_log('send meme:'),
+      'MEME: ': do_media('meme of '),
       'SCREEN: ': do_log('send screenshot:'),
       '': do_send
   }
@@ -105,18 +124,28 @@ def function_from_command(command=None):
 
 def GPT_3(messages):
   response_object = openai.Completion.create(
-      engine=ENGINE,
+      engine=OPENAI_ENGINE,
       prompt=messages,
       temperature=TEMPERATURE,
       max_tokens=MAX_TOKENS,
       top_p=1,
       frequency_penalty=0,
       presence_penalty=0.6,
-      stop=["\n"],
+      stop=['\n'],
   )
 
   # remove whitespace recommended by OpenAI
   return str(response_object['choices'][0]['text'])[1:]
+
+def DALLE_2(description):
+  # dalle 2 python api
+  # https://pythondig.com/r/use-dalle--in-python
+  # https://pypi.org/project/dalle2/1.0.8/
+
+  dalle2 = Dalle2(OPENAI_DALLE_TOKEN)
+  response_object = dalle2.generate(description)
+
+  return response_object[0]['generation']['image_path']
 
 
 conversation_manager = ConversationManager(
@@ -125,7 +154,7 @@ conversation_manager = ConversationManager(
 
 @client.event
 async def on_ready():
-  print(f"Logged in as {client.user}")
+  print(f'Logged in as {client.user}')
 
   # randomly initiate a conversation
   while True:
@@ -187,8 +216,6 @@ async def on_message(message):
 
 
 async def execute(message, conversation, save):
-  # TODO: media / pictures
-
   # return if the bot is sleeping, but with a certain probability to go back online
   if message.guild.get_member(client.user.id).status != discord.Status.online and not random.random() < 0.125:
     return
@@ -225,5 +252,5 @@ async def execute(message, conversation, save):
       await function_from_command(command)(message, conversation, save, arg)
 
 
-openai.api_key = API_KEY
+openai.api_key = OPENAI_API_KEY
 client.run(BOT_TOKEN)
