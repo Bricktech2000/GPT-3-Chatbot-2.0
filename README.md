@@ -52,6 +52,8 @@ The current training data is over 5000 words long. The longer it is, the more ac
 
 Below is a made-up conversation as an example
 
+[//]: # '(duplicate with website post)'
+
 ```markdown
 # START
 
