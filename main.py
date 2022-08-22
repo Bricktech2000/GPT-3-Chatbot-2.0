@@ -40,7 +40,7 @@ def name_from_member(member):
   with open('username_map.json', 'r') as f:
     username_map = json.load(f)
     id = member.id if member.id != client.user.id else 0
-    return username_map.get(id, member.display_name).lower()
+    return username_map.get(str(id), member.display_name).lower()
 
 
 def function_from_command(command=None):
