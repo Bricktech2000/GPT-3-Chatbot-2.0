@@ -137,6 +137,7 @@ def GPT_3(messages):
   # remove whitespace recommended by OpenAI
   return str(response_object['choices'][0]['text'])[1:]
 
+
 def DALLE_2(description):
   # dalle 2 python api
   # https://pythondig.com/r/use-dalle--in-python
@@ -172,7 +173,7 @@ async def on_ready():
     conversation = conversation.with_message(
         ' ', ' ', time.time())
     channel = client.get_channel(int(random_channel_id))
-    last_message = (await channel.history(limit=1).flatten())[0]
+    last_message = await channel.fetch_message(channel.last_message_id)
 
     # 5 hours to 20 hours
     await function_from_command('INIT;')(last_message, conversation, save, None, go_offline=False, min=5*60*60, max=20*60*60)
