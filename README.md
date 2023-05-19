@@ -1,6 +1,6 @@
 # GPT-3 Chatbot 2.0
 
-A chatbot based on GPT-3 to replace our friend Grace on Discord
+_A chatbot based on GPT-3 to replace our friend Grace on Discord_
 
 ## Overview
 
