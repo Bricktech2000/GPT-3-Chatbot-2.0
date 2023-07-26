@@ -21,6 +21,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.presences = True
 intents.reactions = True
+intents.message_content = True
 client = discord.Client(intents=intents)
 
 BOT_TOKEN = sys.argv[1]
